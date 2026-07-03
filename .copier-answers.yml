@@ -1,0 +1,14 @@
+# Changes here will be overwritten by Copier; NEVER EDIT MANUALLY
+_commit: 3b36d17
+_src_path: .
+author_email: janedoe@example.com
+author_name: Jane Doe
+github_username: ulgens
+license: MIT
+max_python_version: "3.15"
+min_python_version: "3.12"
+project_description: ""
+project_name: anything-library-test01
+project_type: Library
+use_codecov: false
+use_ty: false
