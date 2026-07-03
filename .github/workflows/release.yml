@@ -1,0 +1,51 @@
+name: "Release"
+
+on:
+  push:
+    tags:
+      - "v*"
+
+concurrency:
+  group: ${{ github.workflow }}
+
+permissions:
+  contents: read
+
+env:
+  # renovate: datasource=python-version depName=python
+  PYTHON_VERSION: 3.14
+  # renovate: datasource=pypi depName=uv
+  UV_VERSION: 0.11.26
+
+jobs:
+  release:
+    name: Build & publish to PyPI
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      id-token: write  # needed for OIDC-based PyPI publishing
+      attestations: write  # needed for build provenance attestation
+
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0  # v7.0.0
+        name: Checkout
+        with:
+          persist-credentials: false
+      - name: Install uv ${{ env.UV_VERSION }} & Python ${{ env.PYTHON_VERSION }}
+        uses: astral-sh/setup-uv@fac544c07dec837d0ccb6301d7b5580bf5edae39  # v8.2.0
+        with:
+          # Purposefully disabling cache for release operations
+          enable-cache: false
+          python-version: ${{ env.PYTHON_VERSION }}
+          version: ${{ env.UV_VERSION }}
+
+      - name: Build package
+        run: uv build
+
+      - name: Attest build provenance
+        uses: actions/attest@a1948c3f048ba23858d222213b7c278aabede763  # v4.1.1
+        with:
+          subject-path: "dist/*"
+
+      - name: Publish to PyPI (with release attestation)
+        run: uv publish --attest
